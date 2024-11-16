@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Турнирный редактор</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #523634;
+    color: #2f3e46;
+    padding: 20px;
+    gap: 20px;
+  }
+  .flex-horiz {
+    display: flex;
+    justify-content: space-between;
+  }
+  .top-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .btm-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  .custom-text-container {
+    margin-top: 15px;
+  }
+  .textArea {
+    width: 50%;
+  }
+  textarea {
+    width: 100%;
+    height: 300px;
+    border: 2px solid #1f2e2d;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #DDC5A2;
+    color: #1f2e2d;
+    font-size: 16px;
+    white-space: pre;
+    resize: vertical;
+  }
+  button {
+    padding: 10px 20px;
+    background-color: #52958b;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button.ready {
+    background-color: #c96666;
+  }
+  button:hover {
+    background-color: #004d47;
+    color: #fff;
+  }
+  button.ready:hover {
+    background-color: #991a1a;
+  }
+  input.custom-text {
+    width: 200px;
+    border: 2px solid #1f2e2d;
+    border-radius: 5px;
+    padding: 5px 10px;
+    background-color: #DDC5A2;
+    color: #1f2e2d;
+    font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  #tableContainer {
+    width: 40%;
+    height: fit-content;
+    display: none;
+    overflow-x: auto;
+    border: 1px solid #301B28;
+    background-color: #DDC5A2;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  table td {
+    border: 1px solid #301B28;
+    padding: 10px;
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+<div class="top-toolbar">
+    <button onclick="applyCurrency('$')">$</button>
+    <button onclick="applyCurrency('€')">€</button>
+    <button onclick="applyCurrency('UZS')">UZS</button>
+    <button onclick="applyCurrency('₸')">₸</button>
+    <button onclick="applyCurrency('₼')">₼</button>
+    <button onclick="applyCurrency('CAD')">C$</button>
+    <button onclick="applyCurrency('INR')">INR</button>
+    <button onclick="applyCurrency('BDT')">BDT</button>
+    <button onclick="applyCurrency('CLP')">CLP</button>
+    <button onclick="applyCurrency('MXN')">MXN</button>
+    <button onclick="applyCurrency('GTQ')">GTQ</button>
+    <button onclick="applyCurrency('HNL')">HNL</button>
+    <button onclick="applyCurrency('BOB')">BOB</button>
+  </div>
+<div class="flex-horiz">
+<div class="textArea">  
+  <textarea id="textArea" placeholder="Введите данные построчно..."></textarea>
+</div>
+<div id="tableContainer">
+  <table id="outputTable"></table>
+</div>
+</div>
+<div class="btm-toolbar">
+    <button onclick="addText('Bonus Sport')">Bonus Sport</button>
+    <button onclick="addText('Bonus Casino')">Bonus Casino</button>
+    <button onclick="addText('Free Bet')">Free Bet</button>
+    <button onclick="addText('Free Spins')">Free Spins</button>
+    <button onclick="addText('Real Money')">Real Money</button>
+    <button onclick="wrapInBrackets()">[...]</button>
+    <button class="ready" onclick="generateTable()">Ready</button>
+    <button onclick="clearExtra()">🧹 Clear</button>
+    <button onclick="undo()">↩️</button>
+    <button onclick="redo()">↪️</button>
+  </div>
+  <div class="custom-text-container">
+    <input type="text" id="customTextInput" class="custom-text" placeholder="custom text..." />
+    <button onclick="addCustomText()">☑️</button>
+  </div>
+
+
+<script>
+  const textArea = document.getElementById('textArea');
+  const customTextInput = document.getElementById('customTextInput');
+  const tableContainer = document.getElementById('tableContainer');
+  const outputTable = document.getElementById('outputTable');
+
+  const undoStack = [];
+  const redoStack = [];
+
+  function saveState() {
+    undoStack.push(textArea.value);
+    redoStack.length = 0; 
+  }
+
+  function undo() {
+    if (undoStack.length > 0) {
+      redoStack.push(textArea.value); 
+      textArea.value = undoStack.pop(); 
+    }
+  }
+
+  function redo() {
+    if (redoStack.length > 0) {
+      undoStack.push(textArea.value); 
+      textArea.value = redoStack.pop(); 
+    }
+  }
+
+  function applyCurrency(currency) {
+    saveState();
+    const lines = textArea.value.split('\n');
+    const updatedLines = lines.map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return ''; 
+      return formatCurrency(trimmed, currency); 
+    });
+    textArea.value = updatedLines.join('\n'); 
+  }
+
+  function formatCurrency(value, currency) {
+    const number = parseFloat(value.replace(/[^0-9]/g, ''));
+    if (isNaN(number)) return value;
+
+    switch (currency) {
+      case '€': return `€ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'UZS': return `${number.toLocaleString('en-US').replace(/,/g, ' ')} SO’M`;
+      case '₸': return `${number.toLocaleString('en-US').replace(/,/g, ' ')} ₸`;
+      case '₼': return `${number.toLocaleString('en-US').replace(/,/g, ' ')} ₼`;
+      case 'CAD': return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'INR': return `${number.toLocaleString('en-IN')} INR`;
+      case 'BDT': return `${number.toLocaleString('en-IN')} BDT`;
+      case 'CLP': return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'MXN': return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'GTQ': return `Q ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'HNL': return `L ${number.toLocaleString('en-US')}`;
+      case 'BOB': return `Bs ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      default: return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+    }
+  }
+
+  function addText(text) {
+    saveState();
+    const lines = textArea.value.split('\n');
+    const updatedLines = lines.map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return ''; 
+      return `${trimmed} ${text}`.trim(); 
+    });
+    textArea.value = updatedLines.join('\n');
+  }
+
+  function addCustomText() {
+    const customText = customTextInput.value.trim();
+    if (!customText) return; // Если поле пустое, ничего не делать
+    addText(customText);
+    customTextInput.value = ''; // Очищаем поле ввода
+  }
+
+  function wrapInBrackets() {
+    saveState();
+    const lines = textArea.value.split('\n');
+    const updatedLines = lines.map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return ''; 
+      return `[${trimmed}]`; 
+    });
+    textArea.value = updatedLines.join('\n');
+  }
+
+  function clearExtra() {
+    saveState();
+    const lines = textArea.value.split('\n');
+    const cleanedLines = lines.map(line => {
+      const number = line.replace(/[^0-9]/g, '').trim(); 
+      return number || ''; 
+    });
+    textArea.value = cleanedLines.join('\n'); 
+  }
+
+  function generateTable() {
+    const lines = textArea.value.split('\n').map(line => line.trim()).filter(line => line);
+    outputTable.innerHTML = '';
+    lines.forEach(line => {
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.textContent = line;
+      row.appendChild(cell);
+      outputTable.appendChild(row);
+    });
+    tableContainer.style.display = 'block';
+    selectTableContent(); 
+  }
+
+  function selectTableContent() {
+    const range = document.createRange();
+    range.selectNodeContents(outputTable);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+</script>
+
+</body>
+</html>

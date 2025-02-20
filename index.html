@@ -192,9 +192,9 @@
       case 'BDT': return `${number.toLocaleString('en-IN')} BDT`;
       case 'CLP': return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
       case 'MXN': return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
-      case 'GTQ': return `Q ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'GTQ': return `Q${number.toLocaleString('en-US')}`;
       case 'HNL': return `L ${number.toLocaleString('en-US')}`;
-      case 'BOB': return `Bs ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'BOB': return `Bs ${number.toLocaleString('en-US').replace(/,/g, '.')}`;
       default: return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
     }
   }

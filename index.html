@@ -6,262 +6,294 @@
 <title>Турнирный редактор</title>
 <link rel="icon" type="image/png" href="img/edit3.png">
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #523634;
-    color: #2f3e46;
-    padding: 20px;
-    gap: 20px;
+  :root{
+    --bg:#523634; --ink:#2f3e46; --paper:#DDC5A2; --line:#1f2e2d; --frame:#301B28;
+    --btn:#52958b; --btn-hover:#004d47; --btn-ready:#c96666; --btn-ready-hover:#991a1a;
+    --focus:#00c2a8;
   }
-  .flex-horiz {
-    display: flex;
-    justify-content: space-between;
-  }
-  .top-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .btm-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 10px 0;
-  }
-  .custom-text-container {
-    margin-top: 15px;
-  }
-  .textArea {
-    width: 50%;
+  body { font-family: Arial, sans-serif; background-color: var(--bg); color: var(--ink); padding: 20px; gap: 20px; }
+  .flex-horiz { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+  .top-toolbar, .btm-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .textAreas { display: grid; grid-template-columns: 1fr; gap: 12px; width: 50%; }
+  .textAreas.double { grid-template-columns: 1fr 1fr; }
+  .text-wrap { position: relative; }
+  .text-wrap.active::after{
+    content:"active"; position: absolute; top:6px; right:10px; font-size:12px; color:#000; background:#ffd; padding:2px 6px; border-radius:8px; border:1px solid #00000033;
   }
   textarea {
-    width: 100%;
-    height: 300px;
-    border: 2px solid #1f2e2d;
-    border-radius: 5px;
-    padding: 10px;
-    background-color: #DDC5A2;
-    color: #1f2e2d;
-    font-size: 16px;
-    white-space: pre;
-    resize: vertical;
+    width: 100%; height: 300px; border: 2px solid var(--line); border-radius: 5px; padding: 10px;
+    background-color: var(--paper); color: var(--line); font-size: 16px; white-space: pre; resize: vertical; outline: none;
   }
-  button {
-    padding: 10px 20px;
-    background-color: #52958b;
-    color: #000;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  button.ready {
-    background-color: #c96666;
-  }
-  button:hover {
-    background-color: #004d47;
-    color: #fff;
-  }
-  button.ready:hover {
-    background-color: #991a1a;
-  }
+  .text-wrap { margin-right: 30px;}
+  .text-wrap.active textarea { border-color: var(--focus); box-shadow: 0 0 0 3px #00c2a82a; }
+  button { padding: 10px 20px; background-color: var(--btn); color: #000; border: none; border-radius: 5px; cursor: pointer; }
+  button:hover { background-color: var(--btn-hover); color: #fff; }
+  button.ready { background-color: var(--btn-ready); }
+  button.ready:hover { background-color: var(--btn-ready-hover); }
   input.custom-text {
-    width: 200px;
-    border: 2px solid #1f2e2d;
-    border-radius: 5px;
-    padding: 5px 10px;
-    background-color: #DDC5A2;
-    color: #1f2e2d;
-    font-size: 16px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    width: 200px; border: 2px solid var(--line); border-radius: 5px; padding: 5px 10px;
+    background-color: var(--paper); color: var(--line); font-size: 16px; margin-top: 10px; margin-bottom: 10px;
   }
   #tableContainer {
-    width: 40%;
-    height: fit-content;
-    display: none;
-    overflow-x: auto;
-    border: 1px solid #301B28;
-    background-color: #DDC5A2;
-    padding: 10px;
-    border-radius: 5px;
+    width: 40%; height: fit-content; display: none; overflow-x: auto;
+    border: 1px solid var(--frame); background-color: var(--paper); padding: 10px; border-radius: 5px;
   }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  table td {
-    border: 1px solid #301B28;
-    padding: 10px;
-    text-align: left;
-  }
+  table { border-collapse: collapse; width: 100%; }
+  table td { border: 1px solid var(--frame); padding: 10px; text-align: left; }
+  .mode { display:flex; gap:12px; align-items:center; margin: 6px 0 12px; }
+  .mode label { color:#fff; user-select:none; }
 </style>
 </head>
 <body>
+
 <div class="top-toolbar">
-    <button onclick="applyCurrency('$')">$</button>
-    <button onclick="applyCurrency('€')">€</button>
-    <button onclick="applyCurrency('UZS')">UZS</button>
-    <button onclick="applyCurrency('₸')">₸</button>
-    <button onclick="applyCurrency('₼')">₼</button>
-    <button onclick="applyCurrency('CAD')">C$</button>
-    <button onclick="applyCurrency('INR')">INR</button>
-    <button onclick="applyCurrency('BDT')">BDT</button>
-    <button onclick="applyCurrency('CLP')">CLP</button>
-    <button onclick="applyCurrency('MXN')">MXN</button>
-    <button onclick="applyCurrency('GTQ')">GTQ</button>
-    <button onclick="applyCurrency('HNL')">HNL</button>
-    <button onclick="applyCurrency('BOB')">BOB</button>
-    <button onclick="applyCurrency('NGN')">NGN</button>
-  </div>
+  <button onclick="applyCurrency('$')">$</button>
+  <button onclick="applyCurrency('€')">€</button>
+  <button onclick="applyCurrency('UZS')">UZS</button>
+  <button onclick="applyCurrency('₸')">₸</button>
+  <button onclick="applyCurrency('₼')">₼</button>
+  <button onclick="applyCurrency('CAD')">C$</button>
+  <button onclick="applyCurrency('INR')">INR</button>
+  <button onclick="applyCurrency('BDT')">BDT</button>
+  <button onclick="applyCurrency('CLP')">CLP</button>
+  <button onclick="applyCurrency('MXN')">MXN</button>
+  <button onclick="applyCurrency('GTQ')">GTQ</button>
+  <button onclick="applyCurrency('HNL')">HNL</button>
+  <button onclick="applyCurrency('BOB')">BOB</button>
+  <button onclick="applyCurrency('NGN')">NGN</button>
+</div>
+
+<div class="mode">
+  <label><input type="checkbox" id="doubleMode"> Double bonus</label>
+</div>
+
 <div class="flex-horiz">
-<div class="textArea">  
-  <textarea id="textArea" placeholder="Введите данные построчно..."></textarea>
-</div>
-<div id="tableContainer">
-  <table id="outputTable"></table>
-</div>
-</div>
-<div class="btm-toolbar">
-    <button onclick="addText('Bonus Sport')">Bonus Sport</button>
-    <button onclick="addText('Bonus Casino')">Bonus Casino</button>
-    <button onclick="addText('Free Bet')">Free Bet</button>
-    <button onclick="addText('Free Spins')">Free Spins</button>
-    <button onclick="addText('Real Money')">Real Money</button>
-    <button onclick="wrapInBrackets()">[...]</button>
-    <button class="ready" onclick="generateTable()">Ready</button>
-    <button onclick="clearExtra()">🧹 Clear</button>
-    <button onclick="undo()">↩️</button>
-    <button onclick="redo()">↪️</button>
-  </div>
-  <div class="custom-text-container">
-    <input type="text" id="customTextInput" class="custom-text" placeholder="custom text..." />
-    <button onclick="addCustomText()">☑️</button>
+  <div id="areas" class="textAreas">
+    <div class="text-wrap active" data-key="a">
+      <textarea id="textAreaA" placeholder="Введите данные построчно..."></textarea>
+    </div>
+    <!-- Вторая колонка скрыта по умолчанию, появится при Double -->
+    <div class="text-wrap" data-key="b" style="display:none;">
+      <textarea id="textAreaB" placeholder="Вторая колонка (для double)..."></textarea>
+    </div>
   </div>
 
+  <div id="tableContainer">
+    <table id="outputTable"></table>
+  </div>
+</div>
+
+<div class="btm-toolbar">
+  <button onclick="addText('Bonus Sport')">Bonus Sport</button>
+  <button onclick="addText('Bonus Casino')">Bonus Casino</button>
+  <button onclick="addText('Free Bet')">Free Bet</button>
+  <button onclick="addText('Free Spins')">Free Spins</button>
+  <button onclick="addText('Real Money')">Real Money</button>
+  <button onclick="wrapInBrackets()">[...]</button>
+  <button class="ready" onclick="generateTable()">Ready</button>
+  <button onclick="clearExtra()">🧹 Clear</button>
+  <button onclick="undo()">↩️</button>
+  <button onclick="redo()">↪️</button>
+</div>
+
+<div class="custom-text-container">
+  <input type="text" id="customTextInput" class="custom-text" placeholder="custom text..." />
+  <button onclick="addCustomText()">☑️</button>
+</div>
 
 <script>
-  const textArea = document.getElementById('textArea');
+  // Elements
+  const areaA = document.getElementById('textAreaA');
+  const areaB = document.getElementById('textAreaB');
+  const wraps = Array.from(document.querySelectorAll('.text-wrap'));
+  const areasBox = document.getElementById('areas');
+  const doubleMode = document.getElementById('doubleMode');
   const customTextInput = document.getElementById('customTextInput');
   const tableContainer = document.getElementById('tableContainer');
   const outputTable = document.getElementById('outputTable');
 
+  // History stacks store BOTH columns
   const undoStack = [];
   const redoStack = [];
 
-  function saveState() {
-    undoStack.push(textArea.value);
-    redoStack.length = 0; 
+  // Active area management
+  let activeKey = 'a'; // 'a' or 'b'
+  function getActiveArea(){ return activeKey === 'a' ? areaA : areaB; }
+  function setActive(key){
+    activeKey = key;
+    wraps.forEach(w => w.classList.toggle('active', w.dataset.key === key));
+  }
+  wraps.forEach(w => {
+    const key = w.dataset.key;
+    const ta = key === 'a' ? areaA : areaB;
+    ta.addEventListener('focus', () => setActive(key));
+    // клик по области тоже ставит актив
+    w.addEventListener('click', () => { (key==='a'?areaA:areaB).focus(); setActive(key);});
+  });
+
+  function saveState(){
+    undoStack.push({ a: areaA.value, b: areaB.value, active: activeKey, double: doubleMode.checked });
+    if (undoStack.length > 200) undoStack.shift();
+    redoStack.length = 0;
+  }
+  function restoreState(s){
+    areaA.value = s.a; areaB.value = s.b; setActive(s.active); doubleMode.checked = s.double; toggleDoubleUI();
   }
 
-  function undo() {
-    if (undoStack.length > 0) {
-      redoStack.push(textArea.value); 
-      textArea.value = undoStack.pop(); 
+  function undo(){
+    if (undoStack.length){
+      const cur = { a: areaA.value, b: areaB.value, active: activeKey, double: doubleMode.checked };
+      const prev = undoStack.pop();
+      redoStack.push(cur);
+      restoreState(prev);
+    }
+  }
+  function redo(){
+    if (redoStack.length){
+      const cur = { a: areaA.value, b: areaB.value, active: activeKey, double: doubleMode.checked };
+      const next = redoStack.pop();
+      undoStack.push(cur);
+      restoreState(next);
     }
   }
 
-  function redo() {
-    if (redoStack.length > 0) {
-      undoStack.push(textArea.value); 
-      textArea.value = redoStack.pop(); 
+  // Double UI toggle
+  function toggleDoubleUI(){
+    const second = wraps.find(w => w.dataset.key === 'b');
+    if (doubleMode.checked){
+      areasBox.classList.add('double');
+      second.style.display = '';
+    } else {
+      areasBox.classList.remove('double');
+      second.style.display = 'none';
+      // Если активным был b — вернёмся к a
+      if (activeKey === 'b') setActive('a');
     }
   }
+  doubleMode.addEventListener('change', () => { saveState(); toggleDoubleUI(); });
 
-  function applyCurrency(currency) {
+  // Helpers
+  function mapLines(text, mapper){
+    return text.split('\n').map(line => mapper(line)).join('\n');
+  }
+  function cleanToNumberString(s){ return s.replace(/[^0-9]/g,''); }
+
+  // Formatting functions apply to ACTIVE area only
+  function applyCurrency(currency){
     saveState();
-    const lines = textArea.value.split('\n');
-    const updatedLines = lines.map(line => {
+    const ta = getActiveArea();
+    const lines = ta.value.split('\n');
+    const updated = lines.map(line => {
       const trimmed = line.trim();
-      if (!trimmed) return ''; 
-      return formatCurrency(trimmed, currency); 
+      if (!trimmed) return '';
+      return formatCurrency(trimmed, currency);
     });
-    textArea.value = updatedLines.join('\n'); 
+    ta.value = updated.join('\n');
   }
 
-  function formatCurrency(value, currency) {
+  function formatCurrency(value, currency){
     const number = parseFloat(value.replace(/[^0-9]/g, ''));
     if (isNaN(number)) return value;
-
     switch (currency) {
-      case '€': return `€ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
-      case 'UZS': return `${number.toLocaleString('en-US').replace(/,/g, ' ')} SO’M`;
-      case '₸': return `${number.toLocaleString('en-US').replace(/,/g, ' ')} ₸`;
-      case '₼': return `${number.toLocaleString('en-US').replace(/,/g, ' ')} ₼`;
-      case 'CAD': return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
-      case 'INR': return `${number.toLocaleString('en-IN')} INR`;
-      case 'BDT': return `${number.toLocaleString('en-IN')} BDT`;
-      case 'CLP': return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
-      case 'MXN': return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
-      case 'GTQ': return `Q${number.toLocaleString('en-US')}`;
-      case 'HNL': return `L ${number.toLocaleString('en-US')}`;
-      case 'BOB': return `Bs ${number.toLocaleString('en-US').replace(/,/g, '.')}`;
-      case 'NGN': return `₦${number.toLocaleString('en-US')}`;
-      default: return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case '€':  return `€ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'UZS':return `${number.toLocaleString('en-US').replace(/,/g, ' ')} SO’M`;
+      case '₸':  return `${number.toLocaleString('en-US').replace(/,/g, ' ')} ₸`;
+      case '₼':  return `${number.toLocaleString('en-US').replace(/,/g, ' ')} ₼`;
+      case 'CAD':return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'INR':return `${number.toLocaleString('en-IN')} INR`;
+      case 'BDT':return `${number.toLocaleString('en-IN')} BDT`;
+      case 'CLP':return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'MXN':return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
+      case 'GTQ':return `Q${number.toLocaleString('en-US')}`;
+      case 'HNL':return `L ${number.toLocaleString('en-US')}`;
+      case 'BOB':return `Bs ${number.toLocaleString('en-US').replace(/,/g, '.')}`;
+      case 'NGN':return `₦${number.toLocaleString('en-US')}`;
+      default:   return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
     }
   }
 
-  function addText(text) {
+  function addText(text){
     saveState();
-    const lines = textArea.value.split('\n');
-    const updatedLines = lines.map(line => {
+    const ta = getActiveArea();
+    const lines = ta.value.split('\n');
+    const updated = lines.map(line => {
       const trimmed = line.trim();
-      if (!trimmed) return ''; 
-      return `${trimmed} ${text}`.trim(); 
+      if (!trimmed) return '';
+      return `${trimmed} ${text}`.trim();
     });
-    textArea.value = updatedLines.join('\n');
+    ta.value = updated.join('\n');
   }
 
-  function addCustomText() {
+  function addCustomText(){
     const customText = customTextInput.value.trim();
-    if (!customText) return; // Если поле пустое, ничего не делать
+    if (!customText) return;
     addText(customText);
-    customTextInput.value = ''; // Очищаем поле ввода
+    customTextInput.value = '';
   }
 
-  function wrapInBrackets() {
+  function wrapInBrackets(){
     saveState();
-    const lines = textArea.value.split('\n');
-    const updatedLines = lines.map(line => {
+    const ta = getActiveArea();
+    const lines = ta.value.split('\n');
+    const updated = lines.map(line => {
       const trimmed = line.trim();
-      if (!trimmed) return ''; 
-      return `[${trimmed}]`; 
+      if (!trimmed) return '';
+      return `[${trimmed}]`;
     });
-    textArea.value = updatedLines.join('\n');
+    ta.value = updated.join('\n');
   }
 
-  function clearExtra() {
+  function clearExtra(){
     saveState();
-    const lines = textArea.value.split('\n');
-    const cleanedLines = lines.map(line => {
-      const number = line.replace(/[^0-9]/g, '').trim(); 
-      return number || ''; 
+    const ta = getActiveArea();
+    const lines = ta.value.split('\n');
+    const cleaned = lines.map(line => {
+      const number = cleanToNumberString(line).trim();
+      return number || '';
     });
-    textArea.value = cleanedLines.join('\n'); 
+    ta.value = cleaned.join('\n');
   }
 
-  function generateTable() {
-    const lines = textArea.value.split('\n').map(line => line.trim()).filter(line => line);
+  function generateTable(){
     outputTable.innerHTML = '';
-    lines.forEach(line => {
-      const row = document.createElement('tr');
-      const cell = document.createElement('td');
-      cell.textContent = line;
-      row.appendChild(cell);
-      outputTable.appendChild(row);
-    });
+    const aLines = areaA.value.split('\n').map(s=>s.trim()).filter(Boolean);
+    const isDouble = doubleMode.checked;
+
+    if (isDouble){
+      const bLines = areaB.value.split('\n').map(s=>s.trim());
+      const maxLen = Math.max(aLines.length, bLines.filter(Boolean).length);
+      for (let i=0;i<maxLen;i++){
+        const left  = aLines[i] || '';
+        const right = (bLines[i] || '').trim();
+        const parts = [left, right].filter(Boolean);
+        if (!parts.length) continue;
+        const combined = parts.length === 2 ? `[${parts[0]} + ${parts[1]}]` : `[${parts[0]}]`;
+        appendRow(combined);
+      }
+    } else {
+      // как было: берём непустые строки и не вмешиваемся
+      aLines.forEach(line => appendRow(line));
+    }
+
     tableContainer.style.display = 'block';
-    selectTableContent(); 
+    selectTableContent();
   }
 
-  function selectTableContent() {
+  function appendRow(text){
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.textContent = text;
+    row.appendChild(cell);
+    outputTable.appendChild(row);
+  }
+
+  function selectTableContent(){
     const range = document.createRange();
     range.selectNodeContents(outputTable);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
   }
 </script>
-
 </body>
 </html>

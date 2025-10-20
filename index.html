@@ -52,7 +52,6 @@
   <button onclick="applyCurrency('UZS')">UZS</button>
   <button onclick="applyCurrency('₸')">₸</button>
   <button onclick="applyCurrency('₼')">₼</button>
-  <button onclick="applyCurrency('CAD')">C$</button>
   <button onclick="applyCurrency('INR')">INR</button>
   <button onclick="applyCurrency('BDT')">BDT</button>
   <button onclick="applyCurrency('CLP')">CLP</button>
@@ -61,6 +60,7 @@
   <button onclick="applyCurrency('HNL')">HNL</button>
   <button onclick="applyCurrency('BOB')">BOB</button>
   <button onclick="applyCurrency('NGN')">NGN</button>
+  <button onclick="applyCurrency('KES')">KES</button>
 </div>
 
 <div class="mode">
@@ -199,7 +199,6 @@
       case 'UZS':return `${number.toLocaleString('en-US').replace(/,/g, ' ')} SO’M`;
       case '₸':  return `${number.toLocaleString('en-US').replace(/,/g, ' ')} ₸`;
       case '₼':  return `${number.toLocaleString('en-US').replace(/,/g, ' ')} ₼`;
-      case 'CAD':return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
       case 'INR':return `${number.toLocaleString('en-IN')} INR`;
       case 'BDT':return `${number.toLocaleString('en-IN')} BDT`;
       case 'CLP':return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
@@ -208,6 +207,7 @@
       case 'HNL':return `L ${number.toLocaleString('en-US')}`;
       case 'BOB':return `Bs ${number.toLocaleString('en-US').replace(/,/g, '.')}`;
       case 'NGN':return `₦${number.toLocaleString('en-US')}`;
+      case 'KES':return `KSH ${number.toLocaleString('en-US')}`;
       default:   return `$ ${number.toLocaleString('en-US').replace(/,/g, ' ')}`;
     }
   }
